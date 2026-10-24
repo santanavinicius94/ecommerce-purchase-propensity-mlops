@@ -13,7 +13,7 @@ Requisito: Python 3.11 ou superior. Esta etapa utiliza somente a biblioteca padr
 ```bash
 git clone https://github.com/santanavinicius94/ecommerce-purchase-propensity-mlops.git
 cd ecommerce-purchase-propensity-mlops
-git switch codex/initial-project-setup
+git switch feature/initial-project-setup
 python -m venv .venv
 ```
 

@@ -4,13 +4,13 @@ Preserve `main` e `develop`: sem push direto, force push ou exclusão. Cada alte
 
 ```bash
 git fetch origin
-git switch -c codex/nome-da-alteracao origin/develop
+git switch -c feature/nome-da-alteracao origin/develop
 # Implemente e verifique.
 python scripts/validate_data.py
 python -m unittest discover -s tests -v
 git add <arquivos-alterados>
 git commit -m "Descreve a alteração"
-git push -u origin codex/nome-da-alteracao
+git push -u origin feature/nome-da-alteracao
 ```
 
 Abra um pull request para `develop`; revise o diff, os testes e o impacto nos dados antes da integração. Promova versões estáveis por pull request de `develop` para `main`.
