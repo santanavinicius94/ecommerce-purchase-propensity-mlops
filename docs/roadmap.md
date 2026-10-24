@@ -4,7 +4,6 @@
 
 - Estrutura mínima, documentação e dataset bruto.
 - Validação por linha de comando e testes de entradas inválidas.
-- Branch própria e pull request para `develop`.
 
 ## 2. Exploração e avaliação
 
