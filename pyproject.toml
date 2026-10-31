@@ -5,14 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 authors = [
     { name = "João Faccin" },
-    { name = "Vinícius" }
+    { name = "Vinícius Santana" }
 ]
 requires-python = ">=3.12"
 dependencies = [
     "dvc>=3.67.1",
+    "ipykernel>=7.4.0",
     "mlflow>=3.17.2",
     "pandas>=3.1.0",
     "scikit-learn>=1.9.1",
+    "seaborn>=0.13.2",
 ]
 
 [project.scripts]
