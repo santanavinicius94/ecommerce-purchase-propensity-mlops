@@ -8,12 +8,11 @@ Organização, dados brutos versionados, documentação e validação de entrada
 
 ## Execução local
 
-Requisito: Python 3.11 ou superior. Esta etapa utiliza somente a biblioteca padrão; não há dependências externas para instalar.
+Requisito: Python 3.12 ou superior, conforme `pyproject.toml`. O validador e seus testes utilizam somente a biblioteca padrão; as dependências de ML estão declaradas em `pyproject.toml` e `uv.lock`.
 
 ```bash
 git clone https://github.com/santanavinicius94/ecommerce-purchase-propensity-mlops.git
 cd ecommerce-purchase-propensity-mlops
-git switch feature/initial-project-setup
 python -m venv .venv
 ```
 
@@ -25,6 +24,15 @@ python -m unittest discover -s tests -v
 ```
 
 O validador imprime um resumo JSON, sem modificar os dados. Sucesso retorna código zero; entrada inválida retorna código diferente de zero e uma mensagem de erro.
+
+O CSV é rastreado pelo DVC. Em um clone novo, recupere os dados antes da validação com `uv run dvc pull`, após configurar uv e o acesso ao remote com a dupla.
+
+## Execução com Docker
+
+O [guia de Docker](docs/docker.md) explica o Dockerfile multi-stage, os pré-requisitos,
+os comandos de build e execução no PowerShell e a integração com DVC/MLflow.
+A imagem usa Python 3.12 e `uv.lock`; executa a validação por padrão, recebendo
+os dados por uma pasta montada em modo somente leitura.
 
 ## Organização
 

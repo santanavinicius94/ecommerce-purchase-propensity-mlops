@@ -1,0 +1,16 @@
+# Lista de inclusão: dados, .git, .dvc, .env e ambientes locais ficam de fora.
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!.python-version
+!README.md
+!src/
+!src/**
+!scripts/
+!scripts/**
+**/__pycache__/
+**/*.py[cod]
+**/.env
+**/.env.*
