@@ -1,7 +1,6 @@
 import joblib
 from sklearn.metrics import (
     accuracy_score,
-    average_precision_score,
     precision_recall_fscore_support,
 )
 from sklearn.pipeline import Pipeline
@@ -36,16 +35,12 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test):
         np.ndarray: Os rótulos previstos para o conjunto de testes.
     """
     y_pred = pipeline.predict(X_test)
-    y_proba = pipeline.predict_proba(X_test)[:, 1]
-
-    average_precision = average_precision_score(y_test, y_proba)
     accuracy = accuracy_score(y_test, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(
         y_test, y_pred, average="binary"
     )
 
     metrics_dict = {
-        "average_precision": round(average_precision, 4),
         "precision": round(precision, 4),
         "recall": round(recall, 4),
         "accuracy": round(accuracy, 4),
@@ -59,7 +54,7 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test):
     return y_pred
 
 
-def save_artifact(pipeline, filename: str):
+def save_artifact(pipeline, filename: str) -> None:
     """Serializa e salva o pipeline em disco usando joblib.
 
     Args:

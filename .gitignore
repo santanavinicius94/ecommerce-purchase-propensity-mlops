@@ -23,3 +23,5 @@ artifacts/
 reports/generated/
 mlruns/
 mlartifacts/
+mlflow.db
+/models

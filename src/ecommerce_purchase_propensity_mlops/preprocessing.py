@@ -3,20 +3,45 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, make_pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 
 
-def load_and_split_data(
-    filepath: str,
+def load_data(filepath: str) -> pd.DataFrame:
+    """Carrega um CSV.
+
+    Args:
+        filepath (str): Caminho do arquivo CSV.
+
+    Returns:
+        pd.DataFrame: Um dataframe contendo os dados do arquivo CSV.
+    """
+    df = pd.read_csv(filepath)
+    return df
+
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Renomeia colunas para snakecase quando separadas por espaço.
+
+    Args:
+        df (pd.DataFrame): Dataframe de dados.
+
+    Returns:
+        pd.DataFrame: Um dataframe com nomes de colunas normalizadas.
+    """
+    df_ = df.copy()
+    df_.columns = ["_".join(i.lower().split(" ")) for i in df_.columns]
+    return df_
+
+def split_data(
+    df: pd.DataFrame,
     target_col: str,
     test_size: float = 0.2,
     random_state: int = 7,
     stratify: bool = False,
-):
-    """Carrega um CSV e o divide em conjuntos de treino e teste.
+) -> tuple:
+    """Separa um pd.DataFrame em conjuntos de treino e teste.
 
     Args:
-        filepath (str): Caminho do arquivo CSV.
+        df (pd.DataFrame): Caminho do arquivo CSV.
         target_col (str): Nome da coluna target para predição.
         test_size (float, optional): Proporção do conjunto de dados para incluir no teste. Defaults to 0.2.
         random_state (int, optional): Seed para reprodutibilidade. Defaults to 7.
@@ -25,8 +50,6 @@ def load_and_split_data(
     Returns:
         tuple: Uma tupla contendo (X_train, X_test, y_train, y_test).
     """
-
-    df = pd.read_csv(filepath)
     X = df.drop(columns=[target_col])
     y = df[target_col]
 
@@ -35,6 +58,21 @@ def load_and_split_data(
     return train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=to_stratify
     )
+
+def _create_custom_num_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Realiza a engenharia de features numéricas.
+
+    Aplica uma transformação logarítmica para todas as features numéricas.
+
+    Args:
+        df (pd.Dataframe): Dataframe de entrada com features numéricas.
+
+    Returns:
+        pd.Dataframe: Cópia modificada do dataframe com as features transformadas.
+    """
+    df_out = df.copy()
+    df_out = df_out.map(np.log1p)
+    return df_out
 
 def create_preprocessing_pipeline(
     num_features: list, cat_features: list
@@ -51,7 +89,10 @@ def create_preprocessing_pipeline(
     Returns:
         ColumnTransformer: componente configurado de pré-processamento do pipeline
     """
-    num_transformer = make_pipeline(StandardScaler())
+    custom_features_transformer = FunctionTransformer(
+        _create_custom_num_features, validate=False
+    )
+    num_transformer = make_pipeline(custom_features_transformer, StandardScaler())
     cat_transformer = make_pipeline(
         OneHotEncoder(handle_unknown="infrequent_if_exist", drop="first")
     )
