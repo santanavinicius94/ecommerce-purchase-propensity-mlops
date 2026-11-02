@@ -1,0 +1,170 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: uv run python scripts/prepare_data.py --config params.yaml
+    deps:
+    - path: data/raw/online_shoppers_intention.csv
+      hash: md5
+      md5: cc6ec1db03b4f10f8de52c56ff48b085
+      size: 1072063
+    - path: pyproject.toml
+      hash: md5
+      md5: 3765ea582e9568d2befeacd25b1c5296
+      size: 934
+    - path: scripts/common.py
+      hash: md5
+      md5: c2b134b08264ccc7c46e96c68201d2c7
+      size: 1240
+    - path: scripts/prepare_data.py
+      hash: md5
+      md5: e7bfc40438e7611e01ac0ff7e8e1e53e
+      size: 1210
+    - path: src/ecommerce_purchase_propensity_mlops/preprocessing.py
+      hash: md5
+      md5: c44206a9ebe3648cc0eefee79e39563b
+      size: 4087
+    - path: uv.lock
+      hash: md5
+      md5: de0d0b7691663c36c90be5d2b7d2e301
+      size: 768654
+    params:
+      params.yaml:
+        paths.raw_data: data/raw/online_shoppers_intention.csv
+        paths.split_data: data/interim/split.joblib
+        split:
+          target: revenue
+          test_size: 0.2
+          random_state: 7
+          stratify: true
+    outs:
+    - path: data/interim/split.joblib
+      hash: md5
+      md5: 6a0d3b150d12a70c8637a46da7e1a8c4
+      size: 2150828
+  train:
+    cmd: uv run python scripts/train.py --config params.yaml
+    deps:
+    - path: data/interim/split.joblib
+      hash: md5
+      md5: 6a0d3b150d12a70c8637a46da7e1a8c4
+      size: 2150828
+    - path: pyproject.toml
+      hash: md5
+      md5: 3765ea582e9568d2befeacd25b1c5296
+      size: 934
+    - path: scripts/common.py
+      hash: md5
+      md5: c2b134b08264ccc7c46e96c68201d2c7
+      size: 1240
+    - path: scripts/train.py
+      hash: md5
+      md5: d711fee701b14ca255024c09011319ba
+      size: 2576
+    - path: src/ecommerce_purchase_propensity_mlops/preprocessing.py
+      hash: md5
+      md5: c44206a9ebe3648cc0eefee79e39563b
+      size: 4087
+    - path: src/ecommerce_purchase_propensity_mlops/training.py
+      hash: md5
+      md5: c7388efa12efd22d8bc21f8334d5e36c
+      size: 2522
+    - path: uv.lock
+      hash: md5
+      md5: de0d0b7691663c36c90be5d2b7d2e301
+      size: 768654
+    params:
+      params.yaml:
+        features:
+          numeric:
+          - administrative
+          - administrative_duration
+          - informational
+          - informational_duration
+          - productrelated
+          - productrelated_duration
+          - bouncerates
+          - exitrates
+          - pagevalues
+          - specialday
+          categorical:
+          - month
+          - operatingsystems
+          - browser
+          - region
+          - traffictype
+          - visitortype
+          - weekend
+        mlflow:
+          experiment_name: online_shoppers_intention_experiment
+        model:
+          name: random_forest
+          type: random_forest
+          random_state: 7
+          n_estimators: 20
+          max_depth:
+          min_samples_split: 2
+          min_samples_leaf: 1
+          class_weight: balanced
+          n_jobs: -1
+        paths.mlflow_run: artifacts/mlflow_run.json
+        paths.model: models/random_forest.joblib
+        split:
+          target: revenue
+          test_size: 0.2
+          random_state: 7
+          stratify: true
+    outs:
+    - path: artifacts/mlflow_run.json
+      hash: md5
+      md5: 6f78bf0ba4ea17458bba32ac8fafa871
+      size: 46
+    - path: models/random_forest.joblib
+      hash: md5
+      md5: af46a9d6529d5fb500b17da9f5c4c71a
+      size: 3894463
+  evaluate:
+    cmd: uv run python scripts/evaluate.py --config params.yaml
+    deps:
+    - path: artifacts/mlflow_run.json
+      hash: md5
+      md5: 6f78bf0ba4ea17458bba32ac8fafa871
+      size: 46
+    - path: data/interim/split.joblib
+      hash: md5
+      md5: 6a0d3b150d12a70c8637a46da7e1a8c4
+      size: 2150828
+    - path: models/random_forest.joblib
+      hash: md5
+      md5: af46a9d6529d5fb500b17da9f5c4c71a
+      size: 3894463
+    - path: pyproject.toml
+      hash: md5
+      md5: 3765ea582e9568d2befeacd25b1c5296
+      size: 934
+    - path: scripts/common.py
+      hash: md5
+      md5: c2b134b08264ccc7c46e96c68201d2c7
+      size: 1240
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c415121d3bdc3f7461829dc36ce46812
+      size: 1087
+    - path: src/ecommerce_purchase_propensity_mlops/training.py
+      hash: md5
+      md5: c7388efa12efd22d8bc21f8334d5e36c
+      size: 2522
+    - path: uv.lock
+      hash: md5
+      md5: de0d0b7691663c36c90be5d2b7d2e301
+      size: 768654
+    params:
+      params.yaml:
+        mlflow:
+          experiment_name: online_shoppers_intention_experiment
+        model.name: random_forest
+        paths.metrics: reports/generated/metrics.json
+    outs:
+    - path: reports/generated/metrics.json
+      hash: md5
+      md5: e2369c8444b98d73cceaf87f095bcf1f
+      size: 104

@@ -1,0 +1,47 @@
+paths:
+  raw_data: data/raw/online_shoppers_intention.csv
+  split_data: data/interim/split.joblib
+  model: models/random_forest.joblib
+  metrics: reports/generated/metrics.json
+  mlflow_run: artifacts/mlflow_run.json
+
+split:
+  target: revenue
+  test_size: 0.2
+  random_state: 7
+  stratify: true
+
+model:
+  name: random_forest
+  type: random_forest
+  random_state: 7
+  n_estimators: 20
+  max_depth: null
+  min_samples_split: 2
+  min_samples_leaf: 1
+  class_weight: balanced
+  n_jobs: -1
+
+features:
+  numeric:
+    - administrative
+    - administrative_duration
+    - informational
+    - informational_duration
+    - productrelated
+    - productrelated_duration
+    - bouncerates
+    - exitrates
+    - pagevalues
+    - specialday
+  categorical:
+    - month
+    - operatingsystems
+    - browser
+    - region
+    - traffictype
+    - visitortype
+    - weekend
+
+mlflow:
+  experiment_name: online_shoppers_intention_experiment

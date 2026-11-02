@@ -2,9 +2,11 @@ from pathlib import Path
 
 import joblib
 import mlflow
+import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     precision_recall_fscore_support,
+    roc_auc_score,
 )
 from sklearn.pipeline import Pipeline
 
@@ -25,7 +27,7 @@ def train_model(pipeline, X_train, y_train) -> Pipeline:
     return pipeline
 
 
-def evaluate_model(model_name: str, pipeline, X_test, y_test):
+def evaluate_model(model_name: str, pipeline, X_test, y_test) -> dict:
     """Avalia o pipeline treinado em dados de teste, calcula métricas de performance, registra o experimento e printa um resumo.
 
     Args:
@@ -35,29 +37,35 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test):
         y_test: Rótulos verdadeiros do conjunto de dados de teste.
 
     Returns:
-        np.ndarray: Os rótulos previstos para o conjunto de testes.
+        dict: As métricas resultantes do teste.
     """
     y_pred = pipeline.predict(X_test)
+    y_proba = pipeline.predict_proba(X_test)[:, 1]
     accuracy = accuracy_score(y_test, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(
         y_test, y_pred, average="binary", zero_division=0
     )
+    roc_auc = roc_auc_score(y_test, y_proba)
 
     metrics_dict = {
         "precision": round(precision, 4),
         "recall": round(recall, 4),
         "accuracy": round(accuracy, 4),
         "f1": round(f1, 4),
+        "roc_auc" : round(roc_auc, 4)
     }
 
-    if mlflow.active_run() is not None:
-        mlflow.log_metrics({f"test_{key}": value for key, value in metrics_dict.items()})
+    mlflow.log_metric("test_precision", precision)
+    mlflow.log_metric("test_recall", recall)
+    mlflow.log_metric("test_accuracy", accuracy)
+    mlflow.log_metric("test_f1", f1)
+    mlflow.log_metric("test_roc_auc", roc_auc)
 
     print(f"=== {model_name} ===")
     for metric_name, metric_value in metrics_dict.items():
         print(f"{metric_name}: {metric_value}")
 
-    return y_pred
+    return metrics_dict
 
 
 def save_artifact(pipeline, filename: str) -> None:
