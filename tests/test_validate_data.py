@@ -69,7 +69,7 @@ class DatasetValidationTests(unittest.TestCase):
     def test_cli_returns_failure_for_missing_file(self):
         script = Path(__file__).resolve().parents[1] / "scripts/validate_data.py"
         result = subprocess.run([sys.executable, str(script), "--data", str(self.path)],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 1)
         self.assertIn("Erro", result.stderr)
         self.assertEqual(result.stdout, "")

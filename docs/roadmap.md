@@ -4,6 +4,9 @@
 
 - Estrutura mínima, documentação e dataset bruto.
 - Validação por linha de comando e testes de entradas inválidas.
+- Pré-processamento e regressão logística com tracking MLflow implementados.
+- Testes de split, transformações, inferência, serialização e tracking isolado.
+- Docker multi-stage com comandos de validação e treinamento documentados.
 
 ## 2. Exploração e avaliação
 
@@ -27,9 +30,9 @@ Checkpoint: execução reproduzível dos dados às predições, sem API obrigat�
 
 ## 4. Evolução de MLOps
 
-- Introduzir DVC e definir armazenamento remoto de dados e artefatos.
-- Introduzir MLflow para experimentos e modelos.
-- Containerizar com Docker e padronizar a execução.
-- Preparar Kubernetes e automações do pipeline.
+- Migrar o remote local DVC para armazenamento compartilhado quando necessário.
+- Implementar o pipeline de execução em `dvc.yaml` e o MLflow Model Registry.
+- Automatizar testes e build Docker em CI.
+- Avaliar orquestração adicional somente quando houver requisitos operacionais.
 
 Checkpoint: reprodução em ambiente limpo e demonstração do versionamento. Cada incremento terá sua branch e revisão.

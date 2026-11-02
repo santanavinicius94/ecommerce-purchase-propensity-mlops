@@ -9,7 +9,6 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-
 DEFAULT_DATA = Path(__file__).resolve().parents[1] / "data/raw/online_shoppers_intention.csv"
 COLUMNS = (
     "Administrative", "Administrative_Duration", "Informational",

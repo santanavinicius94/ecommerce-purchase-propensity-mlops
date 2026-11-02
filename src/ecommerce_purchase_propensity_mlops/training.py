@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import joblib
+import mlflow
 from sklearn.metrics import (
     accuracy_score,
     precision_recall_fscore_support,
@@ -37,7 +40,7 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test):
     y_pred = pipeline.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(
-        y_test, y_pred, average="binary"
+        y_test, y_pred, average="binary", zero_division=0
     )
 
     metrics_dict = {
@@ -46,6 +49,9 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test):
         "accuracy": round(accuracy, 4),
         "f1": round(f1, 4),
     }
+
+    if mlflow.active_run() is not None:
+        mlflow.log_metrics({f"test_{key}": value for key, value in metrics_dict.items()})
 
     print(f"=== {model_name} ===")
     for metric_name, metric_value in metrics_dict.items():
@@ -61,5 +67,6 @@ def save_artifact(pipeline, filename: str) -> None:
         pipeline: O pipeline treinado do modelo a ser salvo.
         filename (str): O caminho de destino e nome do arquivo a ser salvo.
     """
+    Path(filename).parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, filename)
     print(f"Artefato salvo com sucesso em {filename}")
