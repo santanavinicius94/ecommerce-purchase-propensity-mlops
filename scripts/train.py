@@ -14,12 +14,42 @@ from common import (
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
 from ecommerce_purchase_propensity_mlops.preprocessing import (
     assemble_full_pipeline,
     create_preprocessing_pipeline,
 )
 from ecommerce_purchase_propensity_mlops.training import save_artifact, train_model
+
+CROSS_VALIDATION_METRICS = (
+    "average_precision",
+    "precision",
+    "recall",
+    "f1",
+    "roc_auc",
+)
+
+
+def cross_validate_model(pipeline, X_train, y_train, random_state: int) -> dict[str, float]:
+    """Avalia o pipeline nos folds estratificados do conjunto de treino."""
+    folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state)
+    results = cross_validate(
+        pipeline,
+        X_train,
+        y_train,
+        cv=folds,
+        scoring=CROSS_VALIDATION_METRICS,
+        n_jobs=1,
+        error_score="raise",
+    )
+    metrics = {
+        f"cv_{metric}_{stat}": float(getattr(results[f"test_{metric}"], stat)())
+        for metric in CROSS_VALIDATION_METRICS
+        for stat in ("mean", "std")
+    }
+    mlflow.log_metrics(metrics)
+    return metrics
 
 
 def main() -> None:
@@ -65,6 +95,12 @@ def main() -> None:
                 "split_random_state": config["split"]["random_state"],
                 "stratify": config["split"]["stratify"],
             }
+        )
+        cross_validate_model(
+            pipeline,
+            split["X_train"],
+            split["y_train"],
+            config["split"]["random_state"],
         )
         trained_pipeline = train_model(pipeline, split["X_train"], split["y_train"])
         ensure_parent(model_path)

@@ -58,16 +58,16 @@ stages:
       size: 1240
     - path: scripts/train.py
       hash: md5
-      md5: d711fee701b14ca255024c09011319ba
-      size: 2576
+      md5: 3810d075ddec91b56ce178427cde7912
+      size: 3608
     - path: src/ecommerce_purchase_propensity_mlops/preprocessing.py
       hash: md5
       md5: c44206a9ebe3648cc0eefee79e39563b
       size: 4087
     - path: src/ecommerce_purchase_propensity_mlops/training.py
       hash: md5
-      md5: c18555ce34601010b05b11a9dcc51c29
-      size: 2607
+      md5: 464074b210dd2d87abdebab6c96e4220
+      size: 2827
     - path: uv.lock
       hash: md5
       md5: de0d0b7691663c36c90be5d2b7d2e301
@@ -97,17 +97,12 @@ stages:
         mlflow:
           experiment_name: online_shoppers_intention_experiment
         model:
-          name: random_forest
-          type: random_forest
+          name: logistic_regression
+          type: logistic_regression
           random_state: 7
-          n_estimators: 20
-          max_depth:
-          min_samples_split: 2
-          min_samples_leaf: 1
           class_weight: balanced
-          n_jobs: -1
         paths.mlflow_run: artifacts/mlflow_run.json
-        paths.model: models/random_forest.joblib
+        paths.model: models/online_shoppers_intention_model.joblib
         split:
           target: revenue
           test_size: 0.2
@@ -116,27 +111,27 @@ stages:
     outs:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: e2357ceea54ac6d030c61dcfe954090c
+      md5: b8206456b9e7181cbcafb4165c29397b
       size: 46
-    - path: models/random_forest.joblib
+    - path: models/online_shoppers_intention_model.joblib
       hash: md5
-      md5: 256e56d62058be635b82e86df253566f
-      size: 3894463
+      md5: 83df4678fb1d3a1ac96003cc3593ac85
+      size: 7006
   evaluate:
     cmd: python scripts/evaluate.py --config params.yaml
     deps:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: e2357ceea54ac6d030c61dcfe954090c
+      md5: b8206456b9e7181cbcafb4165c29397b
       size: 46
     - path: data/interim/split.joblib
       hash: md5
       md5: 6a0d3b150d12a70c8637a46da7e1a8c4
       size: 2150828
-    - path: models/random_forest.joblib
+    - path: models/online_shoppers_intention_model.joblib
       hash: md5
-      md5: 256e56d62058be635b82e86df253566f
-      size: 3894463
+      md5: 83df4678fb1d3a1ac96003cc3593ac85
+      size: 7006
     - path: pyproject.toml
       hash: md5
       md5: 3765ea582e9568d2befeacd25b1c5296
@@ -151,8 +146,8 @@ stages:
       size: 1087
     - path: src/ecommerce_purchase_propensity_mlops/training.py
       hash: md5
-      md5: c18555ce34601010b05b11a9dcc51c29
-      size: 2607
+      md5: 464074b210dd2d87abdebab6c96e4220
+      size: 2827
     - path: uv.lock
       hash: md5
       md5: de0d0b7691663c36c90be5d2b7d2e301
@@ -161,10 +156,10 @@ stages:
       params.yaml:
         mlflow:
           experiment_name: online_shoppers_intention_experiment
-        model.name: random_forest
+        model.name: logistic_regression
         paths.metrics: reports/generated/metrics.json
     outs:
     - path: reports/generated/metrics.json
       hash: md5
-      md5: e2369c8444b98d73cceaf87f095bcf1f
-      size: 104
+      md5: 79b689cab0ca7d2eb840958949bb8ecc
+      size: 133

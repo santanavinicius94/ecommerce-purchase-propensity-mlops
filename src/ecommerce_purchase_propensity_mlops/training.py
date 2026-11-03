@@ -4,6 +4,7 @@ import joblib
 import mlflow
 from sklearn.metrics import (
     accuracy_score,
+    average_precision_score,
     precision_recall_fscore_support,
     roc_auc_score,
 )
@@ -40,6 +41,8 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test) -> dict:
     """
     y_pred = pipeline.predict(X_test)
     y_proba = pipeline.predict_proba(X_test)[:, 1]
+
+    average_precision = average_precision_score(y_test, y_proba)
     accuracy = accuracy_score(y_test, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(
         y_test, y_pred, average="binary", zero_division=0
@@ -47,6 +50,7 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test) -> dict:
     roc_auc = roc_auc_score(y_test, y_proba)
 
     metrics_dict = {
+        "average_precision": round(average_precision, 4),
         "precision": round(precision, 4),
         "recall": round(recall, 4),
         "accuracy": round(accuracy, 4),
@@ -54,6 +58,7 @@ def evaluate_model(model_name: str, pipeline, X_test, y_test) -> dict:
         "roc_auc" : round(roc_auc, 4)
     }
 
+    mlflow.log_metric("test_average_precision", average_precision)
     mlflow.log_metric("test_precision", precision)
     mlflow.log_metric("test_recall", recall)
     mlflow.log_metric("test_accuracy", accuracy)
