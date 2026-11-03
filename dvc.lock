@@ -66,8 +66,8 @@ stages:
       size: 4087
     - path: src/ecommerce_purchase_propensity_mlops/training.py
       hash: md5
-      md5: c7388efa12efd22d8bc21f8334d5e36c
-      size: 2522
+      md5: c18555ce34601010b05b11a9dcc51c29
+      size: 2607
     - path: uv.lock
       hash: md5
       md5: de0d0b7691663c36c90be5d2b7d2e301
@@ -116,18 +116,18 @@ stages:
     outs:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: 6f78bf0ba4ea17458bba32ac8fafa871
+      md5: c9b8e10c0c4e25596608bf587ecf0e60
       size: 46
     - path: models/random_forest.joblib
       hash: md5
-      md5: af46a9d6529d5fb500b17da9f5c4c71a
+      md5: 3919b132c0951a6d1e03c473c62a529e
       size: 3894463
   evaluate:
     cmd: uv run python scripts/evaluate.py --config params.yaml
     deps:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: 6f78bf0ba4ea17458bba32ac8fafa871
+      md5: c9b8e10c0c4e25596608bf587ecf0e60
       size: 46
     - path: data/interim/split.joblib
       hash: md5
@@ -135,7 +135,7 @@ stages:
       size: 2150828
     - path: models/random_forest.joblib
       hash: md5
-      md5: af46a9d6529d5fb500b17da9f5c4c71a
+      md5: 3919b132c0951a6d1e03c473c62a529e
       size: 3894463
     - path: pyproject.toml
       hash: md5
@@ -151,8 +151,8 @@ stages:
       size: 1087
     - path: src/ecommerce_purchase_propensity_mlops/training.py
       hash: md5
-      md5: c7388efa12efd22d8bc21f8334d5e36c
-      size: 2522
+      md5: c18555ce34601010b05b11a9dcc51c29
+      size: 2607
     - path: uv.lock
       hash: md5
       md5: de0d0b7691663c36c90be5d2b7d2e301

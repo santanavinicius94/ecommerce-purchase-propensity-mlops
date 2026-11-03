@@ -2,7 +2,6 @@ from pathlib import Path
 
 import joblib
 import mlflow
-import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     precision_recall_fscore_support,
