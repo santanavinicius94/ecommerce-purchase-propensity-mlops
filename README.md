@@ -1,73 +1,90 @@
 # E-commerce Purchase Propensity
 
-Projeto de Machine Learning Engineering para estimar propensão de compra em sessões de e-commerce.
+Pipeline de Machine Learning para estimar a propensão de compra em sessões de e-commerce. O fluxo usa DVC para dados e execução reproduzível, MLflow para tracking e Docker para execução em container.
 
-## Estado atual
+## Pré-requisitos
 
-- CSV versionado com DVC e validado conforme o [dicionário de dados](docs/data_dictionary.md).
-- Pré-processamento com log1p, StandardScaler e OneHotEncoder, ajustado apenas no treino.
-- Regressão logística com classes balanceadas e split estratificado (seed 7).
-- MLflow Tracking para parâmetros, modelo e métricas de teste na mesma execução.
-- Testes automatizados de entrada, pré-processamento, treinamento, persistência e tracking.
-- Dockerfile multi-stage para validação e treinamento batch.
+- Git, Python 3.12 e [uv](https://docs.astral.sh/uv/)
+- Acesso ao storage DVC compartilhado pela equipe
+- Docker (opcional, para execução em container)
 
-Model Registry e orquestração com `dvc.yaml` permanecem pendentes. O versionamento de arquivos `.dvc` já existe, mas não representa um pipeline de execução.
+## Instalação e reprodução local
 
-## Ambiente local
+Clone o repositório, instale as dependências fixadas no lock file e recupere o dataset:
 
-Requisitos: Git, uv e Python 3.12 (versão definida em `.python-version`). Execute na raiz:
-
-```powershell
+```bash
+git clone <URL_DO_REPOSITORIO>
+cd <DIRETORIO_DO_REPOSITORIO>
 uv sync --locked
-uv run --locked python -m pytest -q
-uv run --locked ruff check .
+
+# Crie o storage DVC local e informe seu caminho ao repositório.
+mkdir -p ../dvc-storage
+uv run dvc remote modify --local local_remote ../dvc-storage
 ```
 
-O uv instala o pacote e o grupo de desenvolvimento respeitando `uv.lock`. Os testes usam dados sintéticos e MLflow temporário; não precisam do CSV original nem de servidor externo.
+Preencha o storage com os objetos DVC fornecidos pela equipe. Em seguida, recupere os dados e reproduza o pipeline:
 
-## Recuperar e validar dados
-
-O remote DVC atual é local (`../../dvc-storage`), portanto não estará disponível automaticamente em outra máquina. Configure um armazenamento que contenha os objetos versionados:
-
-```powershell
-uv run --locked dvc remote modify --local local_remote "C:/dados/dvc-storage"
-uv run --locked dvc pull data/raw/online_shoppers_intention.csv.dvc
-uv run --locked python scripts/validate_data.py
+```bash
+uv run dvc pull
+uv run dvc repro
 ```
 
-Substitua o caminho pelo armazenamento real. O validador não altera o CSV: imprime JSON com contagens, duplicatas e hash; retorna 1 para entrada inválida. Consulte [dados brutos](data/raw/README.md).
+O pipeline executa `prepare`, `train` e `evaluate`. Os resultados ficam em `models/`, `reports/generated/` e `mlruns/`.
 
-## Treinar e consultar experimentos
+## Executar `dvc repro`
 
-```powershell
-$env:MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"
-uv run --locked python -m scripts.train_model
-uv run --locked mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 5000
+Use este comando após alterar dados, parâmetros ou código rastreado pelo DVC:
+
+```bash
+uv run dvc status
+uv run dvc repro
 ```
 
-Abra http://127.0.0.1:5000. O treinamento valida a entrada, separa treino/teste, ajusta o pipeline e salva `models/logistic_regression.joblib`. As métricas `test_precision`, `test_recall`, `test_accuracy` e `test_f1` usam o conjunto de teste. O modelo registrado como artefato de tracking ainda não é uma versão no Model Registry.
+Para executar todas as etapas novamente, inclusive as que já estão atualizadas:
 
-Para personalizar caminhos:
-
-```powershell
-uv run --locked python -m scripts.train_model --data data/raw/online_shoppers_intention.csv --model artifacts/model.joblib --experiment online_shoppers_intention_experiment
+```bash
+uv run dvc repro --force
 ```
 
-O script também aceita execução direta (`python scripts/train_model.py`). Importá-lo não inicia treinamento. Diretórios de saída são criados automaticamente. Consulte `--help` para os argumentos.
+## Visualizar experimentos no MLflow
 
-## Docker
+Inicialize o servidor:
 
-O [guia de Docker](docs/docker.md) apresenta o build, a validação e o treinamento com armazenamento persistente. A imagem usa Python 3.12, dependências do lock e usuário sem privilégios; a validação é o comando padrão.
+```bash
+uv run mlflow server --port 5000
+```
 
-## Organização e validação
+Abra <http://127.0.0.1:5000>. Cada run registra parâmetros, métricas de validação cruzada e métricas do conjunto de teste.
 
-| Caminho | Responsabilidade |
-| --- | --- |
-| `scripts/validate_data.py` | Contrato e perfil do CSV |
-| `scripts/train_model.py` | Execução do treino e tracking |
-| `src/ecommerce_purchase_propensity_mlops/preprocessing.py` | Transformações e split |
-| `src/ecommerce_purchase_propensity_mlops/training.py` | Treino, avaliação e serialização |
-| `tests/test_validate_data.py` | Entradas inválidas e preservação dos dados |
-| `tests/test_pipeline.py` | Pipeline, inferência, serialização e integração MLflow |
+## Criar e executar a imagem Docker
 
-A suíte verifica comportamento, não garante qualidade preditiva no mundo real. O tratamento de duplicatas antes do split, disponibilidade de `PageValues` no momento da previsão, baseline e métricas para desbalanceamento ainda exigem avaliação. Consulte o [roadmap](docs/roadmap.md). O fluxo atual é acadêmico/batch; serving e monitoramento não estão implementados.
+Construa a imagem:
+
+```bash
+docker build -t ecommerce-propensity:local .
+```
+
+Com os dados já recuperados pelo DVC no host, execute a imagem com o dataset montado:
+
+```bash
+docker run --rm \
+  --mount type=bind,source="$(pwd)/data/raw",target=/app/data/raw,readonly \
+  ecommerce-propensity:local
+```
+
+## Executar uma predição
+
+`scripts/predict.py` carrega `models:/online_shoppers_intention@champion`. Antes de executá-lo, registre o modelo no MLflow com esse nome e atribua a ele o alias `champion` na interface do MLflow.
+
+```bash
+uv run python scripts/predict.py
+```
+
+O script imprime a predição de um registro de exemplo.
+
+## Verificações
+
+```bash
+uv run python -m pytest -q
+uv run ruff check .
+```

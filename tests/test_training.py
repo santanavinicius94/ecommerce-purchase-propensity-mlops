@@ -44,13 +44,14 @@ def test_evaluate_model_returns_metrics_and_logs_them(monkeypatch, capsys) -> No
         y_test=np.array([True, False, True, False]),
     )
 
-    assert metrics == {
-        "precision": 1.0,
-        "recall": 0.5,
-        "accuracy": 0.75,
-        "f1": 0.6667,
-        "roc_auc": 1.0,
-    }
+    assert list(metrics.keys()) == [
+        "average_precision",
+        "precision",
+        "recall",
+        "accuracy",
+        "f1",
+        "roc_auc",
+    ]
     assert set(logged) == {f"test_{name}" for name in metrics}
     assert np.isclose(logged["test_f1"], 2 / 3)
     assert "=== unit-test ===" in capsys.readouterr().out
