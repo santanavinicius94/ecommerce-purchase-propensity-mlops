@@ -46,6 +46,35 @@ Para executar todas as etapas novamente, inclusive as que já estão atualizadas
 uv run dvc repro --force
 ```
 
+## Testar modelos e parâmetros
+
+Altere a seção `model` em `params.yaml` e execute `uv run dvc repro`. O DVC identifica a mudança e refaz as etapas necessárias.
+
+Regressão Logística:
+
+```yaml
+model:
+  name: logistic_regression
+  type: logistic_regression
+  random_state: 7
+  class_weight: balanced
+```
+
+Random Forest:
+
+```yaml
+model:
+  name: random_forest
+  type: random_forest
+  random_state: 7
+  n_estimators: 200
+  max_depth: null
+  min_samples_split: 2
+  min_samples_leaf: 1
+  class_weight: balanced
+  n_jobs: -1
+```
+
 ## Visualizar experimentos no MLflow
 
 Inicialize o servidor:

@@ -1,5 +1,0 @@
-* text=auto
-*.py text eol=lf
-*.md text eol=lf
-# Preserva os bytes originais do dataset.
-data/raw/*.csv -text whitespace=cr-at-eol
