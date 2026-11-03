@@ -3,7 +3,7 @@ vars:
 
 stages:
   prepare:
-    cmd: uv run python scripts/prepare_data.py --config params.yaml
+    cmd: python scripts/prepare_data.py --config params.yaml
     deps:
       - scripts/common.py
       - scripts/prepare_data.py
@@ -20,7 +20,7 @@ stages:
       - ${paths.split_data}
 
   train:
-    cmd: uv run python scripts/train.py --config params.yaml
+    cmd: python scripts/train.py --config params.yaml
     deps:
       - scripts/common.py
       - scripts/train.py
@@ -43,7 +43,7 @@ stages:
           cache: false
 
   evaluate:
-    cmd: uv run python scripts/evaluate.py --config params.yaml
+    cmd: python scripts/evaluate.py --config params.yaml
     deps:
       - scripts/common.py
       - scripts/evaluate.py

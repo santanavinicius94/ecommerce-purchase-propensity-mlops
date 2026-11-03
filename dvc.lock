@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: uv run python scripts/prepare_data.py --config params.yaml
+    cmd: python scripts/prepare_data.py --config params.yaml
     deps:
     - path: data/raw/online_shoppers_intention.csv
       hash: md5
@@ -42,7 +42,7 @@ stages:
       md5: 6a0d3b150d12a70c8637a46da7e1a8c4
       size: 2150828
   train:
-    cmd: uv run python scripts/train.py --config params.yaml
+    cmd: python scripts/train.py --config params.yaml
     deps:
     - path: data/interim/split.joblib
       hash: md5
@@ -116,18 +116,18 @@ stages:
     outs:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: c9b8e10c0c4e25596608bf587ecf0e60
+      md5: e2357ceea54ac6d030c61dcfe954090c
       size: 46
     - path: models/random_forest.joblib
       hash: md5
-      md5: 3919b132c0951a6d1e03c473c62a529e
+      md5: 256e56d62058be635b82e86df253566f
       size: 3894463
   evaluate:
-    cmd: uv run python scripts/evaluate.py --config params.yaml
+    cmd: python scripts/evaluate.py --config params.yaml
     deps:
     - path: artifacts/mlflow_run.json
       hash: md5
-      md5: c9b8e10c0c4e25596608bf587ecf0e60
+      md5: e2357ceea54ac6d030c61dcfe954090c
       size: 46
     - path: data/interim/split.joblib
       hash: md5
@@ -135,7 +135,7 @@ stages:
       size: 2150828
     - path: models/random_forest.joblib
       hash: md5
-      md5: 3919b132c0951a6d1e03c473c62a529e
+      md5: 256e56d62058be635b82e86df253566f
       size: 3894463
     - path: pyproject.toml
       hash: md5

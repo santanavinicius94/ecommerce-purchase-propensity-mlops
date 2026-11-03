@@ -6,6 +6,15 @@
 !uv.lock
 !.python-version
 !README.md
+!dvc.yaml
+!dvc.lock
+!params.yaml
+!.dvc/
+!.dvc/config
+!.dvc/.gitignore
+!data/
+!data/raw/
+!data/raw/online_shoppers_intention.csv.dvc
 !src/
 !src/**
 !scripts/

@@ -22,12 +22,25 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 RUN useradd --create-home --uid 10001 appuser \
-    && mkdir -p /app/data/raw
+    && mkdir -p /app/.dvc /app/artifacts /app/data/interim /app/data/raw \
+        /app/models /app/reports/generated \
+    && chown -R appuser:appuser /app
 
-# Instalação não editável: o pacote já está dentro do ambiente virtual.
+# A instalação não editável do pacote já está dentro do ambiente virtual.
 COPY --from=builder /app/.venv /app/.venv
-COPY scripts/ ./scripts/
+
+# Fontes e arquivos necessários para `dvc repro`. O CSV continua vindo por bind mount.
+COPY --from=builder --chown=appuser:appuser /app/src/ ./src/
+COPY --chown=appuser:appuser scripts/ ./scripts/
+COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser dvc.yaml dvc.lock params.yaml ./
+COPY --chown=appuser:appuser .dvc/ ./.dvc/
+COPY --chown=appuser:appuser data/raw/online_shoppers_intention.csv.dvc ./data/raw/
+
+# A imagem não inclui o histórico Git; DVC opera em modo sem SCM no container.
+RUN sed -i '/^\[core\]$/a\    no_scm = true' .dvc/config
+
 USER appuser
 
-# O CSV é fornecido no docker run, não incorporado à imagem.
-CMD ["python", "scripts/validate_data.py"]
+# O CSV é fornecido no docker run em /app/data/raw.
+CMD ["dvc", "repro"]
